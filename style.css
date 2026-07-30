@@ -33,7 +33,18 @@ body {
     background: var(--bg-dark);
     color: #ffffff;
     overflow: hidden;
-    transition: background 1.5s ease;
+    transition: background 2.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* SECTION 2 RICH PINK BACKGROUND STATE */
+body.section-2-active {
+    background: radial-gradient(
+        circle at 50% 40%, 
+        #e58fa2 0%, 
+        #c96f85 55%, 
+        #9b465d 100%
+    );
+    color: #ffffff;
 }
 
 /* Ambient Screen Vignette */
@@ -44,11 +55,16 @@ body {
     z-index: 2;
     background: radial-gradient(circle at center, transparent 30%, rgba(0, 0, 0, 0.6) 100%);
     opacity: 0.6;
-    transition: opacity 1s ease;
+    transition: opacity 2.4s cubic-bezier(0.25, 1, 0.5, 1), background 2.4s ease;
 }
 
 body.active-release #ambient-overlay {
     opacity: 0.85;
+}
+
+body.section-2-active #ambient-overlay {
+    opacity: 0.45;
+    background: radial-gradient(circle at center, transparent 30%, rgba(40, 10, 20, 0.6) 100%);
 }
 
 /* ===================================================== */
@@ -188,14 +204,6 @@ main {
     padding: 20px;
     background: transparent;
     position: relative;
-}
-
-.page h2 {
-    color: #ffffff;
-    font-size: clamp(2rem, 5vw, 4rem);
-    font-weight: 700;
-    text-align: center;
-    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
 }
 
 /* ===================================================== */
