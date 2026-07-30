@@ -112,7 +112,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return "#" + ((1 << 24) + (R << 16) + (G << 8) + B).toString(16).slice(1);
     }
 
-    // Helper to spawn a batch of balloons over a spread of time
     function spawnWave(count, spreadTimeMs = 1200) {
         for (let i = 0; i < count; i++) {
             const clusterIndex = i % 3;
@@ -120,34 +119,28 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Interval timers for infinite waves
     let continuousInterval = null;
     let burstTimeout = null;
 
     function triggerSectionBalloons(sectionIndex) {
-        // Clear previous section's loop timers
         if (continuousInterval) clearInterval(continuousInterval);
         if (burstTimeout) clearTimeout(burstTimeout);
 
         document.body.classList.add("active-release");
 
         if (sectionIndex === 0) {
-            // SECTION 1: Initial Burst of 35, then infinite waves of 10
             spawnWave(35, 1200);
 
             burstTimeout = setTimeout(() => {
-                // Endless 10-balloon waves every 2.5 seconds
                 continuousInterval = setInterval(() => {
                     spawnWave(10, 1500);
                 }, 2500);
             }, 1500);
 
         } else {
-            // SECTIONS 2, 3, & 4: Initial Burst of 18, then infinite waves of 9
             spawnWave(18, 1000);
 
             burstTimeout = setTimeout(() => {
-                // Endless 9-balloon waves every 2.8 seconds
                 continuousInterval = setInterval(() => {
                     spawnWave(9, 1800);
                 }, 2800);
@@ -155,7 +148,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Start Section 1 flow immediately on page load
     triggerSectionBalloons(0);
 
     // =====================================================
@@ -188,9 +180,15 @@ document.addEventListener("DOMContentLoaded", () => {
             behavior: "smooth"
         });
 
+        // Enable pinkish background state when scrolling to Section 2
+        if (currentIndex === 1) {
+            document.body.classList.add("section-2-active");
+        } else {
+            document.body.classList.remove("section-2-active");
+        }
+
         updateScrollIndicator();
 
-        // Trigger balloon burst + continuous flow for the new section
         if (previousIndex !== currentIndex) {
             triggerSectionBalloons(currentIndex);
         }
@@ -299,11 +297,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const glassContent = document.getElementById("typewriter-content");
 
     let isOpened = false;
-    let currentWritingTimeout = null;
 
     const lines = [
         "ni-hao,",
-        "To my deerest and prettiest someone, may you surf this new wave through highs and lows, and live to its fullest."
+        "To my deerest and prettiest someone, may your life be filled with everything"
     ];
 
     function playAudio() {
@@ -351,11 +348,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    document.addEventListener("click", () => {
-        if (!isOpened) return;
-        resetCardView();
-    });
-
     function startHandwritingSequence(textArray) {
         glassContent.innerHTML = "";
         const letterSpans = [];
@@ -399,71 +391,32 @@ document.addEventListener("DOMContentLoaded", () => {
             glassContent.appendChild(p);
         });
 
+        // Pen tip cursor element
         const penTip = document.createElement("span");
         penTip.className = "pen-tip";
-        if (glassContent.lastElementChild) {
-            glassContent.lastElementChild.appendChild(penTip);
-        }
+        glassContent.lastElementChild.appendChild(penTip);
 
         let currentIndex = 0;
 
-        function writeNextLetter() {
-            if (currentIndex >= letterSpans.length) {
-                penTip.style.opacity = "0";
-                setTimeout(() => penTip.remove(), 500);
-                return;
+        function typeNextChar() {
+            if (currentIndex < letterSpans.length) {
+                const item = letterSpans[currentIndex];
+                item.element.classList.add("in");
+
+                // Move pen tip behind current letter
+                item.element.after(penTip);
+
+                currentIndex++;
+                const delay = item.char === " " ? 60 : Math.floor(Math.random() * 30) + 40;
+                setTimeout(typeNextChar, delay);
+            } else {
+                // Fade out pen cursor when complete
+                setTimeout(() => {
+                    penTip.style.opacity = "0";
+                }, 1000);
             }
-
-            const current = letterSpans[currentIndex];
-            current.element.classList.add("in");
-            current.element.after(penTip);
-
-            const spanRect = current.element.getBoundingClientRect();
-            const containerRect = glassContent.getBoundingClientRect();
-            if (spanRect.bottom > containerRect.bottom - 20) {
-                glassContent.scrollTo({
-                    top: glassContent.scrollTop + 30,
-                    behavior: 'smooth'
-                });
-            }
-
-            let baseDelay = isMobile ? 70 : 90;
-            baseDelay += (Math.random() * 40 - 20);
-
-            if (current.char === ".") {
-                baseDelay += 240; 
-            } else if (current.char === ",") {
-                baseDelay += 160;
-            } else if (current.char === " ") {
-                baseDelay += 30;
-            }
-
-            currentIndex++;
-            currentWritingTimeout = setTimeout(writeNextLetter, baseDelay);
         }
 
-        writeNextLetter();
+        typeNextChar();
     }
-
-    function resetCardView() {
-        isOpened = false;
-
-        if (currentWritingTimeout) {
-            clearTimeout(currentWritingTimeout);
-        }
-
-        glassCard.classList.remove("visible");
-
-        setTimeout(() => {
-            glassCard.classList.add("hidden");
-            glassContent.innerHTML = "";
-
-            envelopeWrapper.classList.remove("hidden", "fade-out", "open");
-            updateScrollIndicator();
-        }, 600);
-    }
-    document.addEventListener("visibilitychange", () => {
-        if (document.hidden) clearAllBalloonTimers();
-        else triggerSectionBalloons(currentIndex);
-    });
 });
