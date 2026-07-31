@@ -1,9 +1,197 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-    const isMobile = window.innerWidth < 768;
+    // =====================================================
+    // 0. INTRO STAGE: POP PHYSICS & EXPLOSION ENGINE
+    // =====================================================
+
+    const introStage = document.getElementById("intro-stage");
+    const introBalloonWrapper = document.getElementById("intro-balloon-wrapper");
+    const heartBalloonSvg = document.getElementById("heart-balloon-svg");
+    const popCanvas = document.getElementById("pop-canvas");
+    const bgMusic = document.getElementById("bg-music");
+
+    let isIntroPopped = false;
+
+    // Web Audio Synthesizer for realistic Pop sound effect
+    function playPopSound() {
+        try {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return;
+            const ctx = new AudioCtx();
+            
+            // Noise buffer generation
+            const bufferSize = ctx.sampleRate * 0.08;
+            const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = Math.random() * 2 - 1;
+            }
+
+            const noise = ctx.createBufferSource();
+            noise.buffer = buffer;
+
+            const filter = ctx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(800, ctx.currentTime);
+            filter.frequency.exponentialRampToValueAtTime(50, ctx.currentTime + 0.08);
+
+            const gain = ctx.createGain();
+            gain.gain.setValueAtTime(1, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.08);
+
+            noise.connect(filter);
+            filter.connect(gain);
+            gain.connect(ctx.destination);
+
+            noise.start();
+        } catch (e) {
+            console.log("Web Audio not supported or blocked", e);
+        }
+    }
+
+    // Canvas Confetti & Ribbon Particle System
+    if (popCanvas) {
+        const ctx = popCanvas.getContext("2d");
+        let particles = [];
+        let animFrameId = null;
+
+        function resizeCanvas() {
+            popCanvas.width = window.innerWidth;
+            popCanvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener("resize", resizeCanvas);
+
+        class Particle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.type = Math.random() < 0.25 ? 'ribbon' : (Math.random() < 0.2 ? 'balloon' : 'confetti');
+                
+                const angle = Math.random() * Math.PI * 2;
+                const speed = 4 + Math.random() * 16;
+                this.vx = Math.cos(angle) * speed;
+                this.vy = Math.sin(angle) * speed - (this.type === 'balloon' ? 4 : 2);
+
+                this.color = ["#ffb703", "#f48fb1", "#4cc9f0", "#7209b7", "#ff4081", "#ffffff"][Math.floor(Math.random() * 6)];
+                this.size = this.type === 'balloon' ? 12 + Math.random() * 14 : 6 + Math.random() * 8;
+                this.rotation = Math.random() * Math.PI * 2;
+                this.rotSpeed = (Math.random() - 0.5) * 0.2;
+                this.opacity = 1;
+                this.gravity = this.type === 'balloon' ? -0.05 : 0.25;
+                this.drag = 0.96;
+            }
+
+            update() {
+                this.vx *= this.drag;
+                this.vy *= this.drag;
+                this.vy += this.gravity;
+                this.x += this.vx;
+                this.y += this.vy;
+                this.rotation += this.rotSpeed;
+                this.opacity -= 0.015;
+            }
+
+            draw(ctx) {
+                if (this.opacity <= 0) return;
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, this.opacity);
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation);
+                ctx.fillStyle = this.color;
+                ctx.strokeStyle = this.color;
+
+                if (this.type === 'confetti') {
+                    ctx.fillRect(-this.size / 2, -this.size / 2, this.size, this.size * 0.6);
+                } else if (this.type === 'ribbon') {
+                    ctx.beginPath();
+                    ctx.lineWidth = 3;
+                    ctx.moveTo(-10, 0);
+                    ctx.quadraticCurveTo(0, 10, 10, 0);
+                    ctx.stroke();
+                } else if (this.type === 'balloon') {
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, this.size * 0.7, this.size, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                ctx.restore();
+            }
+        }
+
+        function explode(x, y) {
+            particles = [];
+            for (let i = 0; i < 110; i++) {
+                particles.push(new Particle(x, y));
+            }
+
+            function render() {
+                ctx.clearRect(0, 0, popCanvas.width, popCanvas.height);
+                let alive = false;
+                particles.forEach(p => {
+                    p.update();
+                    p.draw(ctx);
+                    if (p.opacity > 0) alive = true;
+                });
+
+                if (alive) {
+                    animFrameId = requestAnimationFrame(render);
+                } else {
+                    ctx.clearRect(0, 0, popCanvas.width, popCanvas.height);
+                    cancelAnimationFrame(animFrameId);
+                }
+            }
+            render();
+        }
+
+        if (introBalloonWrapper) {
+            introBalloonWrapper.addEventListener("click", (e) => {
+                if (isIntroPopped) return;
+                isIntroPopped = true;
+
+                introBalloonWrapper.classList.add("popped");
+
+                // Start audio immediately after balloon popping
+                playAudio();
+
+                // Sound & Particle Blast
+                //playPopSound();
+                const rect = heartBalloonSvg.getBoundingClientRect();
+                const popX = rect.left + rect.width / 2;
+                const popY = rect.top + rect.height / 3;
+                
+                heartBalloonSvg.style.display = "none";
+                explode(popX, popY);
+
+                // Reveal main site smoothly
+                setTimeout(() => {
+                    introStage.classList.add("fade-out");
+                    setTimeout(() => {
+                        introStage.style.display = "none";
+                    }, 1200);
+                }, 400);
+            });
+        }
+    }
+
+    // Audio Playback Helpers
+    function playAudio() {
+        if (bgMusic && bgMusic.paused) {
+            bgMusic.play().catch((err) => {
+                console.log("Audio play error:", err);
+            });
+        }
+    }
+
+    function pauseAudio() {
+        if (bgMusic && !bgMusic.paused) {
+            bgMusic.pause();
+            bgMusic.currentTime = 0; // Reset track position
+        }
+    }
 
     // =====================================================
-    // 1. CONTINUOUS BALLOON ENGINE (BURST + INFINITE FLOW)
+    // 1. CONTINUOUS BALLOON ENGINE
     // =====================================================
 
     const container = document.getElementById("balloon-container");
@@ -180,11 +368,14 @@ document.addEventListener("DOMContentLoaded", () => {
             behavior: "smooth"
         });
 
-        // Enable pinkish background state when scrolling to Section 2
         if (currentIndex === 1) {
             document.body.classList.add("section-2-active");
         } else {
             document.body.classList.remove("section-2-active");
+            // AUTO-CLOSE LETTER ON SCROLLING UP TO SECTION 1
+            if (typeof closeLetter === "function") {
+                closeLetter();
+            }
         }
 
         updateScrollIndicator();
@@ -288,10 +479,9 @@ document.addEventListener("DOMContentLoaded", () => {
     updateAgeCounter();
 
     // =====================================================
-    // 4. SECTION 2: ENVELOPE & WRAP-SAFE HANDWRITING ENGINE
+    // 4. SECTION 2: ENVELOPE, MUSIC & RESET CONTROLLER
     // =====================================================
 
-    const bgMusic = document.getElementById("bg-music");
     const envelopeWrapper = document.getElementById("envelope-wrapper");
     const glassCard = document.getElementById("glass-card");
     const glassContent = document.getElementById("typewriter-content");
@@ -300,26 +490,39 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const lines = [
         "ni-hao,",
-        "To my deerest and prettiest someone, may your life be filled with everything"
+        "To my deerest and prettiest someone, may you surf this new wave through highs and lows, and live to its fullest."
     ];
 
-    function playAudio() {
-        if (bgMusic && bgMusic.paused) {
-            bgMusic.play().catch((err) => {
-                console.log("Audio play error:", err);
+    // Function to close letter card and reset Section 2
+    function closeLetter() {
+        if (!isOpened) return;
+        isOpened = false;
+
+        glassCard.classList.remove("visible");
+
+        setTimeout(() => {
+            glassCard.classList.add("hidden");
+            glassContent.innerHTML = ""; // Reset handwriting content
+
+            envelopeWrapper.classList.remove("hidden");
+            
+            requestAnimationFrame(() => {
+                envelopeWrapper.classList.remove("fade-out");
+                envelopeWrapper.classList.remove("open");
             });
-        }
+
+            updateScrollIndicator();
+        }, 600);
     }
 
     if (envelopeWrapper) {
         envelopeWrapper.addEventListener("click", (e) => {
-            e.stopPropagation();
+            e.stopPropagation(); // Prevents document click from immediately closing it
 
             if (isOpened) return;
             isOpened = true;
 
             updateScrollIndicator();
-            playAudio();
             envelopeWrapper.classList.add("open");
 
             setTimeout(() => {
@@ -342,11 +545,19 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // Stop card clicks from closing the card
     if (glassCard) {
         glassCard.addEventListener("click", (e) => {
             e.stopPropagation();
         });
     }
+
+    // CLOSE ON TOUCH / CLICK OUTSIDE
+    document.addEventListener("click", (e) => {
+        if (isOpened) {
+            closeLetter();
+        }
+    });
 
     function startHandwritingSequence(textArray) {
         glassContent.innerHTML = "";
@@ -391,7 +602,6 @@ document.addEventListener("DOMContentLoaded", () => {
             glassContent.appendChild(p);
         });
 
-        // Pen tip cursor element
         const penTip = document.createElement("span");
         penTip.className = "pen-tip";
         glassContent.lastElementChild.appendChild(penTip);
@@ -399,18 +609,18 @@ document.addEventListener("DOMContentLoaded", () => {
         let currentIndex = 0;
 
         function typeNextChar() {
+            if (!isOpened) return; // Halt handwriting immediately if letter was closed mid-typing
+
             if (currentIndex < letterSpans.length) {
                 const item = letterSpans[currentIndex];
                 item.element.classList.add("in");
 
-                // Move pen tip behind current letter
                 item.element.after(penTip);
 
                 currentIndex++;
                 const delay = item.char === " " ? 60 : Math.floor(Math.random() * 30) + 40;
                 setTimeout(typeNextChar, delay);
             } else {
-                // Fade out pen cursor when complete
                 setTimeout(() => {
                     penTip.style.opacity = "0";
                 }, 1000);
