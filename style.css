@@ -36,36 +36,96 @@ body {
     transition: background 2.4s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-/* SECTION 2 RICH PINK BACKGROUND STATE */
-body.section-2-active {
-    background: radial-gradient(
-        circle at 50% 40%, 
-        #e58fa2 0%, 
-        #c96f85 55%, 
-        #9b465d 100%
-    );
-    color: #ffffff;
-}
 
-/* Ambient Screen Vignette */
-#ambient-overlay {
+/* ===================================================== */
+/* Intro Stage & Floating Heart Balloon                  */
+/* ===================================================== */
+
+#intro-stage {
     position: fixed;
     inset: 0;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: rgba(13, 15, 24, 0.65);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), backdrop-filter 1.2s ease;
+}
+
+#intro-stage.fade-out {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
     pointer-events: none;
-    z-index: 2;
-    background: radial-gradient(circle at center, transparent 30%, rgba(0, 0, 0, 0.6) 100%);
-    opacity: 0.6;
-    transition: opacity 2.4s cubic-bezier(0.25, 1, 0.5, 1), background 2.4s ease;
 }
 
-body.active-release #ambient-overlay {
-    opacity: 0.85;
+#intro-balloon-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10000;
+    animation: floatingHeart 4s ease-in-out infinite alternate;
 }
 
-body.section-2-active #ambient-overlay {
-    opacity: 0.45;
-    background: radial-gradient(circle at center, transparent 30%, rgba(40, 10, 20, 0.6) 100%);
+#intro-balloon-wrapper.popped {
+    animation: none;
+    pointer-events: none;
 }
+
+#heart-balloon-svg {
+    width: clamp(220px, 45vw, 300px);
+    height: auto;
+    overflow: visible;
+    transition: transform 0.2s ease;
+}
+
+#intro-balloon-wrapper:hover #heart-balloon-svg {
+    transform: scale(1.05);
+}
+
+/* Thinner, Sleek Black String */
+.intro-string {
+    stroke: rgba(17, 17, 17, 0.85);
+    stroke-width: 1.2;
+    fill: none;
+    stroke-linecap: round;
+}
+
+.pop-hint {
+    margin-top: 15px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #ffb7d2;
+    text-shadow: 0 0 12px rgba(244, 143, 177, 0.6);
+    animation: pulseHint 1.8s infinite alternate;
+}
+
+#pop-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+}
+
+@keyframes floatingHeart {
+    0% {
+        transform: translateY(-2%) rotate(-2deg);
+    }
+    100% {
+        transform: translateY(2%) rotate(2deg);
+    }
+}
+
 
 /* ===================================================== */
 /* Floating Scroll Indicator                             */
@@ -207,7 +267,7 @@ main {
 }
 
 /* ===================================================== */
-/* Section 1 Styling                                    */
+/* Section 1 Styling                                     */
 /* ===================================================== */
 
 .hero-card {
@@ -331,7 +391,7 @@ main {
 }
 
 /* ===================================================== */
-/* Section 2 Styling                                    */
+/* Section 2 Styling                                     */
 /* ===================================================== */
 
 .ambient-glow {
@@ -538,7 +598,6 @@ main {
     overflow-wrap: break-word;
 }
 
-/* Word Container & Smooth Letter Reveals */
 .word-span {
     display: inline-block;
     white-space: nowrap;
@@ -584,4 +643,38 @@ main {
     .glass-card {
         padding: 36px 32px;
     }
+}
+
+/* ===================================================== */
+/* SECTION 2 RICH PINK BACKGROUND STATE                  */
+/* ===================================================== */
+
+body.section-2-active {
+    background: radial-gradient(
+        circle at 50% 40%, 
+        #e58fa2 0%, 
+        #c96f85 55%, 
+        #9b465d 100%
+    ) !important;
+    color: #ffffff;
+}
+
+/* Ambient Screen Vignette */
+#ambient-overlay {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+    background: radial-gradient(circle at center, transparent 30%, rgba(0, 0, 0, 0.6) 100%);
+    opacity: 0.6;
+    transition: opacity 2.4s cubic-bezier(0.25, 1, 0.5, 1), background 2.4s ease;
+}
+
+body.active-release #ambient-overlay {
+    opacity: 0.85;
+}
+
+body.section-2-active #ambient-overlay {
+    opacity: 0.35;
+    background: radial-gradient(circle at center, transparent 30%, rgba(60, 15, 30, 0.5) 100%);
 }
