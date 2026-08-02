@@ -490,7 +490,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const lines = [
         "ni-hao,",
-        "To my deerest and prettiest someone, may you surf this new wave through highs and lows, and live to its fullest."
+        "     To my deerest and prettiest someone," ,
+        "I pray all your wishes be fullfilled, and for the hurdles you'll come across while pursuing them, I know you'll face them head on like the courageous girl I know you as.",
+        "Still, should you need me for anything, I'll make sure to be there for you."
+
     ];
 
     // Function to close letter card and reset Section 2
@@ -618,7 +621,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 item.element.after(penTip);
 
                 currentIndex++;
-                const delay = item.char === " " ? 60 : Math.floor(Math.random() * 30) + 40;
+                const delay = item.char === " " ? 20 : Math.floor(Math.random() * 30) + 70;
+                //original const delay = item.char === " " ? 60 : Math.floor(Math.random() * 30) + 40;
                 setTimeout(typeNextChar, delay);
             } else {
                 setTimeout(() => {
