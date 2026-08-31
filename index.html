@@ -1,1 +1,126 @@
-<p>hmmm...</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Something for you</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Ambient Lighting & Vignette Overlay -->
+    <div id="ambient-overlay"></div>
+
+    <!-- Fixed Background Layer (Title & Balloons) -->
+    <div id="balloon-background">
+        <div id="balloon-container"></div>
+    </div>
+
+    <!-- Floating Scroll Indicator -->
+    <div id="scroll-indicator" class="scroll-indicator">
+        <span>Scroll Down</span>
+        <svg class="scroll-arrow" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+    </div>
+
+    <!-- Audio Element for Section 2 (Looping) -->
+    <audio id="bg-music" src="song/song_1.mp3" preload="auto" loop></audio>
+
+    <!-- Main Scroll Container -->
+    <main>
+        
+        <!-- SECTION 1: HERO & AGE COUNTER -->
+        <section class="page" id="section-1">
+            <div class="hero-card">
+                <h1 class="birthday-title">Hii <span class="highlight">Adi,</span> <br/> Happy Birthday tooo U</h1>
+
+                <!-- Live Age Counter Grid (2 Rows x 3 Columns) -->
+                <div class="counter-grid">
+                    <!-- Row 1: Years, Months, Days -->
+                    <div class="counter-box">
+                        <span id="years">00</span>
+                        <label>Years</label>
+                    </div>
+                    <div class="counter-box">
+                        <span id="months">00</span>
+                        <label>Months</label>
+                    </div>
+                    <div class="counter-box">
+                        <span id="days">00</span>
+                        <label>Days</label>
+                    </div>
+
+                    <!-- Row 2: Hours, Minutes, Seconds -->
+                    <div class="counter-box">
+                        <span id="hours">00</span>
+                        <label>Hours</label>
+                    </div>
+                    <div class="counter-box">
+                        <span id="minutes">00</span>
+                        <label>Mins</label>
+                    </div>
+                    <div class="counter-box">
+                        <span id="seconds">00</span>
+                        <label>Secs</label>
+                    </div>
+                </div>
+
+                <!-- Decorated Photo Frame -->
+                <div class="photo-container">
+                    <div class="photo-glow-ring"></div>
+                    <div class="photo-wrapper">
+                        <img id="her-display" src="pic/bd_girl.jpg" alt="Her Photo">
+                    </div>
+                    <div class="photo-badge">✨ Birthday Girl ✨</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: THE LETTER & MUSIC -->
+        <section class="page" id="section-2">
+            <!-- Ambient Glow Background -->
+            <div class="ambient-glow"></div>
+
+            <div class="section2-container">
+                <!-- Sealed Envelope -->
+                <div id="envelope-wrapper" class="envelope-wrapper">
+                    <div class="envelope" id="envelope">
+                        <div class="top-flap"></div>
+                        <div class="pocket"></div>
+                        <div class="seal">🌸</div>
+                    </div>
+                    <p class="click-hint">Tap to open letter</p>
+                </div>
+
+                <!-- Glassmorphic Paper Card -->
+                <div id="glass-card" class="glass-card hidden">
+                    <div class="glass-header">
+                        <span class="card-subtitle">A message for you</span>
+                    </div>
+                    <div class="glass-content" id="typewriter-content">
+                        <!-- Handwritten text appears dynamically here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: THE WISH BOX (Placeholder) -->
+        <section class="page" id="section-3">
+            <h2>Section 3</h2>
+        </section>
+
+    </main>
+
+    <!-- Unified Script -->
+    <script src="script.js"></script>
+
+</body>
+</html>
